@@ -23,7 +23,8 @@ ui <- dashboardPage(
                  menuSubItem("ETFs", tabName = "etfs"))),
       modify_stop_propagation(
         menuItem("Settings", startExpanded = T,
-                 menuSubItem("API", tabName = "api")))
+                 menuSubItem("API", tabName = "api"),
+                 menuSubItem("Dummy", tabName = "dummy", selected = T)))
     )
   ),
   dashboardBody(
@@ -94,10 +95,24 @@ server <- function(input, output, session) {
   
   observe({
     query <- parseQueryString(session$clientData$url_search)
+    if (!is.null(query[["tab"]])) {
+      if (query[["tab"]] == "earning_calendar") {
+        updateTabItems(session, "tabs", selected = "earning_calendar")
+      } else if (query[["tab"]] == "ipo_calendar") {
+        updateTabItems(session, "tabs", selected = "ipo_calendar")
+      } else if (query[["tab"]] == "stocks") {
+        updateTabItems(session, "tabs", selected = "stocks")
+      } 
+    }
+    
     if (!is.null(query[["ticker"]])) {
       ticker(query[["ticker"]])
       updateTabItems(session, "tabs", selected = "stocks")
     }
+  })
+  
+  observe({
+    updateQueryString(paste0("?tab=", input$tabs), mode = "push")
   })
   
   # earning_calendar ----
